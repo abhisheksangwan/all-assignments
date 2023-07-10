@@ -39,11 +39,75 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-const express = require('express');
-const bodyParser = require('body-parser');
 
+const bodyParser = require("body-parser");
+const express = require("express");
 const app = express();
-
+const port = 3000;
 app.use(bodyParser.json());
 
-module.exports = app;
+let todos = [
+  {
+    id: null,
+    title: "Buy Groceries",
+    completed: "False",
+    description: "This is desc for new todo",
+  },
+];
+
+function findIndex(arr, id) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].id === id) return i;
+  }
+  return -1;
+}
+function removeAtIndex(arr, index) {
+  let newArray = [];
+  for (let i = 0; i < arr.length(); i++) {
+    if (i != index) newArray.push(arr[i]);
+  }
+  return newArray;
+}
+app.get("/todos", (req, res) => {
+  res.json(todos);
+});
+app.get("/todos/:id", (req, res) => {
+  const index = findIndex(todos, parseInt(req.params.id));
+  if (index === -1) {
+    res.status(404).send();
+  } else {
+    res.json(todos[index]);
+  }
+});
+app.post("/todos", (req, res) => {
+  const createTodo = {
+    id: Math.floor(Math.random * 1000000), //unique id
+    title: "Buy Groceries",
+    completed: "False",
+    description: "This is desc for new todo",
+  };
+  todos.push(createTodo);
+  res.status(201).send(todos);
+});
+app.put("/todos/:id", (req, res) => {
+  const NewtodoIndex = findIndex(todos, parseInt(req.params.id));
+  if (NewtodoIndex === -1) {
+    res.status(404).send();
+  } else {
+    todos[NewtodoIndex].title = req.body.title;
+    todos[NewtodoIndex].description = req.body.description;
+    res.json(todos[NewtodoIndex]);
+  }
+});
+app.delete("/todos/:id", (req, res) => {
+  const deleteTodoIndex = findIndex(parseInt(req.params.id));
+  if (deleteTodoIndex === -1) {
+    res.status(404).send();
+  } else {
+    todos = removeAtIndex(todos, deleteTodoIndex);
+    res.status(200).send();
+  }
+});
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
